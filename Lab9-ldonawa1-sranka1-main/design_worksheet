@@ -1,0 +1,86 @@
+TODO: (1) Complete this side (partitioning function), implement, & test
+      (2) Complete reverse side (overall program design), implement, & test
+(To print, run 'lpr design_worksheet')
+********************************************************************************
+(1) Board-partitioning function design
+    Reminder: Look at the whole LAB WRITEUP for information on how partitioning
+              should work and suggestions on how to get started.
+Q1: What parameters does this function need and what does it return?  Design 
+    its prototype?
+    This function is type void, so it doesn't return anything. It does take in
+    the number of rows, the number of columns, the type of partitioning,
+    the current thread, the total number of threads, and a pointer to
+    the start and end values being partitioned. These are all ints except for
+    the last 2 parameters, which are int *.
+
+    Prototype:
+    void partition(int tid, int ntid, int r, int c, int rc, int *strt, int *end);
+    tid is the thread number, ntid is the number of threads, r is the row number,
+    c is the column number, rc is if we are doing row or column partitioning,
+    *strt is the starting row/column, and *end is the ending row/column.
+    (Pro tip: pass-by-pointer params are a way to "return" multiple values.)
+Q2: What does this function do?  Design your function's high-level control 
+    flow, and then refine in details.
+    This function splits up groups of rows and columns among different threads
+    to speed up the game of life process. We declare *start and *end in play_gol
+    and partition sets the starting row/column and the ending row/column for
+    each thread. This function doesn't return enything. We first determine if
+    we want to use row or column partitioning. We then find the number of
+    groups of rows and columns we can make by dividing the row number or
+    column number by ntid. If this number is not divisible, we also do
+    the row/column number % ntid. This tells us how many threads get 1 extra
+    row or column. 
+    
+Q3: How are you going to test your function's correctness?  What are the 
+    different config and command-line options you want to test?
+    We tested the function's correctness by printing out the starting
+    row/column and the ending row/column for each thread. We want to
+    test inputting both 1 and 0 in the command line to test both rows and
+    columns. We also want to test partitioning both square and non-square
+    boards. Finally, we want to test cases with bonus rows.
+
+(2) Overall parallel gol program design
+    Reminder: Look at the LAB WRITEUP to understand requirements & control flow
+Q1: What changes need to be made to main's control flow for pthreads?
+
+    In main's control flow, instead of just calling play_gol, for each possible
+    output type, we need to create a for - loop initializing each thread id.
+    Each of our threads are created in this for - loop. After this step we need
+    to join our threads.
+    
+Q2: What additional state do you need to add to the parallel solution?
+    New globals or data structures?  Modifications to existing data structures?
+
+    Within our struct play_gol, we need to add an int variable that is our thread
+    id. We also need to have an int variable that is the total number of threads
+    and an int variable that represents the partition mode. When this variable =
+    0, we use row - partitioning. When this variable = 1, we use column
+    partitioning.
+    
+Q3: What changes need to be made to parallelize play_gol?  Design the 
+    high-level control flow of the pthread version of play_gol, and refine as 
+    needed.  Do you need any new helper functions?  Modify existing ones?  
+    Any parts only 1 thread performs?
+
+    We need to call our partition helper function in play_gol once in order
+    to partition each thread. This will be called in the beginning of play_gol
+    before executing play_gol's functionality. In main, we create each thread by
+    creating an array of tids and creating a new struct play_gol called *data,
+    which is an array of structs. We keep the functionality of play_gol the same
+    since the threads are not overlapping. However, only one thread prints the
+    board in play_gol and one thread prints the total number of live cells after
+    each round. Within play_gol we will need to use thread synchronization 
+    only one thread prints the board and the total number of live cells.
+
+Q4: Does your solution need synchronization?  How many and what type?  Where?
+
+    We will need synchronization at the end of each round. We do not need to 
+    lock the board when performing the game of life itsef because each thread
+    works with a different region of the board. However, we do need 
+    synchronization when determining the number of cells alive. To do so,
+    we need a barrier around updating and printing the total number of cells.
+    The barrier will wait for all threads reach the same point. I will then 
+    create a mutex lock after the barrier so that only one thread can print the 
+    number of cells alive. I will also need a barrier at the end of play_gol. 
+    This barrier will force all threads to wait until the last thread executes
+    so that all threads move to the next round at the same time.

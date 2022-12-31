@@ -1,0 +1,31 @@
+
+
+Lab9 : Parallel GoL
+
+Repo: ldonawa1-sranka1
+>> Checkpoint: 
+[ pts off up to 1 ]: 0
+>> Partitioning: 
+[ pts off up to 2 ]: 0
+
+>> Synchronization and Parallelization: 
+[ pts off up to 7 ]: 0
+
+>>  Simulation Correctness: 
+[ pts off up to 2 ]: 0
+>> Graphical Visualization works: 
+[ pts off up to 1 ]: 0
+-------------------------
+Correctness Total (13pts): 13
+
+>> Program style: 
+[ pts off up to 1 ]: 0
+
+>> Valgrind: 
+[ pts off up to 1 ]: 0
+
+-------------------
+Total (15pts): 15
+>> General comments: Well done!
+
+
